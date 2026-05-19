@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Jade Pure">
+<meta name="theme-color" content="#0a1a14">
+<title>Jade Pure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --jade:        #2d9e7a;
+  --jade-light:  #3dbf93;
+  --jade-dark:   #1a6b52;
+  --jade-pale:   rgba(45,158,122,0.15);
+  --jade-border: rgba(45,158,122,0.35);
+  --bg:          #07110e;
+  --bg2:         #0d1c17;
+  --bg3:         #122018;
+  --surface:     #162820;
+  --surface2:    #1c3228;
+  --border:      rgba(45,158,122,0.18);
+  --border2:     rgba(255,255,255,0.07);
+  --text:        #e8f0ec;
+  --text2:       #8aaa98;
+  --text3:       #4a6b58;
+  --red:         #e05555;
+  --red-pale:    rgba(224,85,85,0.15);
+  --amber:       #d4963a;
+  --amber-pale:  rgba(212,150,58,0.15);
+  --purple:      #7b9fff;
+  --radius:      14px;
+  --radius-sm:   9px;
+}
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html,body { height:100%; background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-serif; font-size:14px; overflow:hidden; }
+
+#app { display:flex; flex-direction:column; height:100vh; height:100dvh; max-width:480px; margin:0 auto; position:relative; overflow:hidden; }
+
+/* HEADER */
+.header { background:var(--bg2); border-bottom:1px solid var(--border); padding-top:env(safe-area-inset-top,0); flex-shrink:0; }
+.header-inner { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; }
+.brand { display:flex; flex-direction:row; align-items:center; }
+.logo-mark { width:28px; height:28px; background:linear-gradient(135deg,var(--jade),var(--jade-dark)); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; margin-right:8px; box-shadow:0 2px 8px rgba(45,158,122,.4); }
+.brand-en { font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:600; color:var(--jade-light); letter-spacing:3px; line-height:1; }
+.brand-ja { font-size:9px; color:var(--text3); letter-spacing:2px; }
+.header-right { display:flex; align-items:center; gap:7px; }
+.badge { padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; border:1px solid; }
+.badge-working { background:var(--red-pale); color:var(--red); border-color:rgba(224,85,85,.3); }
+.badge-waiting { background:var(--jade-pale); color:var(--jade-light); border-color:var(--jade-border); }
+.settings-btn { width:34px; height:34px; border-radius:10px; background:var(--surface); border:1px solid var(--border); color:var(--text2); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+
+/* SYNC BAR */
+.sync-bar { display:flex; align-items:center; justify-content:center; gap:6px; padding:5px 16px; font-size:11px; background:rgba(45,158,122,0.08); border-bottom:1px solid var(--border); }
+.sync-dot { width:7px; height:7px; border-radius:50%; background:var(--jade-light); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+.sync-dot.offline { background:var(--red); animation:none; }
+
+/* RESET BAR */
+.reset-bar { display:flex; align-items:center; justify-content:space-between; padding:7px 16px; background:rgba(123,159,255,.06); border-bottom:1px solid rgba(123,159,255,.15); font-size:11px; color:var(--purple); }
+.reset-now-btn { background:rgba(123,159,255,.12); border:1px solid rgba(123,159,255,.25); color:var(--purple); border-radius:6px; padding:3px 10px; font-size:11px; cursor:pointer; font-family:inherit; }
+
+/* NAV */
+.nav { display:flex; background:var(--bg2); border-bottom:1px solid var(--border); flex-shrink:0; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.nav::-webkit-scrollbar { display:none; }
+.nav-btn { flex:1; padding:11px 4px; background:none; border:none; border-bottom:2px solid transparent; color:var(--text3); font-size:12px; font-family:inherit; cursor:pointer; white-space:nowrap; min-width:70px; }
+.nav-btn.active { color:var(--jade-light); border-bottom-color:var(--jade); }
+
+/* MAIN */
+.main { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:14px; padding-bottom:calc(env(safe-area-inset-bottom,0px) + 14px); }
+.main::-webkit-scrollbar { display:none; }
+
+/* STATS */
+.stats-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:20px; }
+.stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px; text-align:center; position:relative; overflow:hidden; }
+.stat-card::before { content:''; position:absolute; top:0;left:0;right:0; height:2px; background:linear-gradient(90deg,var(--jade-dark),var(--jade-light)); }
+.stat-value { font-size:28px; font-weight:700; color:#fff; line-height:1.1; }
+.stat-unit  { font-size:12px; color:var(--text2); margin-left:2px; }
+.stat-label { font-size:11px; color:var(--text3); margin-top:4px; }
+
+/* SECTION */
+.section { margin-bottom:22px; }
+.section-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.section-title { font-size:13px; font-weight:700; color:var(--text); letter-spacing:.5px; }
+
+/* GIRLS GRID */
+.girls-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
+.girl-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:12px 6px; text-align:center; cursor:pointer; }
+.girl-card:active { transform:scale(.96); }
+.girl-photo  { font-size:26px; margin-bottom:5px; }
+.girl-name   { font-size:13px; font-weight:700; color:var(--text); margin-bottom:5px; }
+.girl-status { display:inline-block; font-size:10px; font-weight:700; border:1px solid; border-radius:20px; padding:2px 8px; margin-bottom:3px; }
+.girl-time,.girl-loc { font-size:10px; color:var(--text3); margin-top:2px; }
+
+.s-waiting { color:var(--jade-light); border-color:var(--jade-border); background:var(--jade-pale); }
+.s-depart  { color:var(--amber);      border-color:rgba(212,150,58,.35); background:var(--amber-pale); }
+.s-serving { color:var(--red);        border-color:rgba(224,85,85,.35);  background:var(--red-pale); }
+.s-break   { color:var(--purple);     border-color:rgba(123,159,255,.35);background:rgba(123,159,255,.1); }
+.s-off     { color:var(--text3);      border-color:rgba(74,107,88,.3);   background:rgba(74,107,88,.08); }
+.card-waiting { border-color:var(--jade-border); background:linear-gradient(145deg,var(--surface),rgba(45,158,122,.08)); }
+.card-depart  { border-color:rgba(212,150,58,.3); background:linear-gradient(145deg,var(--surface),rgba(212,150,58,.06)); }
+.card-serving { border-color:rgba(224,85,85,.3);  background:linear-gradient(145deg,var(--surface),rgba(224,85,85,.06)); }
+.card-break   { border-color:rgba(123,159,255,.25);background:linear-gradient(145deg,var(--surface),rgba(123,159,255,.05)); }
+.card-off     { border-color:var(--border2); }
+
+/* BUTTONS */
+.add-btn { background:var(--jade-pale); border:1px solid var(--jade-border); color:var(--jade-light); border-radius:var(--radius-sm); padding:7px 14px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; }
+.primary-btn { width:100%; background:linear-gradient(135deg,var(--jade),var(--jade-dark)); border:none; border-radius:var(--radius-sm); padding:13px 0; color:#fff; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; letter-spacing:.5px; }
+.danger-btn  { width:100%; background:linear-gradient(135deg,#c04040,#a02020); border:none; border-radius:var(--radius-sm); padding:11px 0; color:#fff; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; }
+.cancel-btn  { flex:1; background:var(--surface); border:1px solid var(--border2); color:var(--text2); border-radius:var(--radius-sm); padding:13px 0; font-size:14px; cursor:pointer; font-family:inherit; }
+
+/* RESERVATION */
+.res-row { background:var(--surface); border:1px solid var(--border2); border-radius:var(--radius); padding:12px 13px; margin-bottom:8px; }
+.res-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.res-info { display:flex; align-items:center; gap:8px; }
+.res-status { font-size:11px; font-weight:700; }
+.res-girl   { font-size:14px; font-weight:700; color:#fff; }
+.res-cust   { font-size:12px; color:var(--text2); }
+.res-time   { font-size:12px; color:var(--text2); font-variant-numeric:tabular-nums; }
+.res-details{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:3px; }
+.res-detail { font-size:11px; color:var(--text3); }
+.res-note   { font-size:11px; color:var(--text2); margin-top:4px; }
+.res-actions{ display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+.res-act-btn{ background:var(--surface2); border:1px solid var(--border2); border-radius:6px; padding:5px 10px; font-size:11px; cursor:pointer; font-family:inherit; color:var(--text2); }
+
+/* DRIVER */
+.driver-row { background:var(--surface); border:1px solid var(--border2); border-radius:var(--radius); padding:13px 14px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
+.driver-name  { font-size:14px; font-weight:700; color:#fff; }
+.driver-phone { font-size:11px; color:var(--text3); margin-top:3px; }
+.driver-right { display:flex; align-items:center; gap:8px; }
+.status-toggle{ border:1px solid; border-radius:20px; padding:6px 16px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; }
+.del-btn { width:32px; height:32px; border-radius:8px; background:var(--red-pale); border:1px solid rgba(224,85,85,.3); color:var(--red); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+
+/* FILTER */
+.filter-row { display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap; }
+.filter-btn { background:var(--surface); border:1px solid var(--border2); color:var(--text3); border-radius:20px; padding:5px 12px; font-size:11px; cursor:pointer; font-family:inherit; }
+.filter-btn.active { background:var(--jade-pale); border-color:var(--jade-border); color:var(--jade-light); }
+
+/* SUMMARY */
+.summary-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+.summary-card { background:var(--surface); border:1px solid var(--border2); border-left:3px solid; border-radius:var(--radius-sm); padding:10px 14px; display:flex; align-items:center; gap:10px; }
+
+/* OVERLAY / SHEET */
+.overlay { position:fixed; inset:0; background:rgba(0,0,0,.82); display:flex; align-items:flex-end; justify-content:center; z-index:1000; backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); animation:fadeIn .15s ease; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.sheet { background:var(--bg2); border-top:1px solid var(--border); border-radius:20px 20px 0 0; width:100%; max-width:480px; max-height:88vh; max-height:88dvh; overflow-y:auto; padding:6px 18px 30px; padding-bottom:calc(env(safe-area-inset-bottom,0px) + 30px); animation:slideUp .2s ease; }
+.sheet::-webkit-scrollbar { display:none; }
+@keyframes slideUp { from{transform:translateY(60px);opacity:0} to{transform:translateY(0);opacity:1} }
+.sheet-handle { width:40px; height:4px; background:var(--border2); border-radius:2px; margin:10px auto 16px; }
+.sheet-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.sheet-title { font-size:16px; font-weight:700; color:#fff; }
+.close-btn { background:var(--surface); border:1px solid var(--border2); color:var(--text2); width:30px; height:30px; border-radius:8px; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+
+/* FORM */
+.form-section { display:flex; flex-direction:column; gap:11px; margin-bottom:16px; }
+.form-row { display:flex; flex-direction:column; gap:4px; }
+.form-label { font-size:11px; color:var(--text2); letter-spacing:.3px; }
+.form-input,.form-select { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px; color:var(--text); font-size:14px; font-family:inherit; outline:none; width:100%; -webkit-appearance:none; }
+.form-input::placeholder { color:var(--text3); }
+.form-input:focus,.form-select:focus { border-color:var(--jade); }
+
+/* STATUS BUTTONS */
+.status-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px; }
+.status-opt { padding:11px 4px; border:1px solid var(--border2); border-radius:var(--radius-sm); font-size:12px; font-weight:700; cursor:pointer; background:transparent; color:var(--text3); font-family:inherit; }
+
+/* SETTINGS */
+.settings-tabs { display:flex; gap:6px; margin-bottom:16px; }
+.settings-tab { flex:1; padding:9px 0; border:1px solid var(--border2); border-radius:var(--radius-sm); font-size:13px; font-weight:700; cursor:pointer; background:transparent; color:var(--text3); font-family:inherit; }
+.settings-tab.active { background:var(--jade-pale); border-color:var(--jade-border); color:var(--jade-light); }
+.add-row { display:flex; gap:7px; align-items:center; margin-bottom:12px; }
+.master-row { display:flex; gap:7px; align-items:center; margin-bottom:8px; }
+.emoji-sel { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px 4px; color:var(--text); font-size:18px; width:50px; text-align:center; font-family:inherit; -webkit-appearance:none; }
+.del-icon-btn { background:var(--red-pale); border:1px solid rgba(224,85,85,.3); color:var(--red); border-radius:8px; padding:8px 10px; font-size:14px; cursor:pointer; flex-shrink:0; }
+
+/* DELETE */
+.delete-link { display:block; width:100%; margin-top:14px; background:none; border:none; color:var(--red); font-size:12px; cursor:pointer; opacity:.6; text-align:center; padding:6px 0; font-family:inherit; }
+.del-confirm-box { margin-top:12px; background:var(--red-pale); border:1px solid rgba(224,85,85,.2); border-radius:var(--radius-sm); padding:12px; }
+.del-confirm-text { font-size:13px; color:var(--red); margin-bottom:10px; }
+.del-confirm-btns { display:flex; gap:8px; }
+.del-cancel { flex:1; background:var(--surface); border:1px solid var(--border2); color:var(--text2); border-radius:8px; padding:9px 0; font-size:13px; cursor:pointer; font-family:inherit; }
+.del-exec   { flex:1; background:rgba(224,85,85,.2); border:1px solid rgba(224,85,85,.4); color:var(--red); border-radius:8px; padding:9px 0; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
+
+.confirm-body  { text-align:center; padding:10px 0; }
+.confirm-icon  { font-size:40px; margin-bottom:10px; }
+.confirm-title { font-size:17px; font-weight:700; color:#fff; margin-bottom:8px; }
+.confirm-desc  { font-size:13px; color:var(--text2); margin-bottom:24px; line-height:1.6; }
+.confirm-btns  { display:flex; gap:10px; }
+
+.empty { color:var(--text3); text-align:center; padding:24px 0; font-size:13px; }
+
+/* LOADING */
+.loading { display:flex; flex-direction:column; align-items:center; justify-content:center; height:200px; gap:12px; color:var(--text3); font-size:13px; }
+.spinner { width:28px; height:28px; border:2px solid var(--border); border-top-color:var(--jade); border-radius:50%; animation:spin .8s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg)} }
+
+/* TOAST */
+.toast { position:fixed; bottom:calc(env(safe-area-inset-bottom,0px) + 20px); left:50%; transform:translateX(-50%); background:var(--jade); color:#fff; font-weight:700; padding:10px 24px; border-radius:24px; font-size:13px; z-index:9999; box-shadow:0 4px 20px rgba(45,158,122,.4); white-space:nowrap; animation:toastIn .2s ease; pointer-events:none; }
+@keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(10px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="logo-mark">💎</div>
+        <div>
+          <div class="brand-en">Jade Pure</div>
+          <div class="brand-ja">MANAGEMENT SYSTEM</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div id="badge-working" class="badge badge-working">稼働 0</div>
+        <div id="badge-waiting" class="badge badge-waiting">待機 0</div>
+        <button class="settings-btn" onclick="openSettings()">⚙</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="sync-bar">
+    <div id="sync-dot" class="sync-dot"></div>
+    <span id="sync-text">接続中...</span>
+  </div>
+
+  <div id="reset-bar" class="reset-bar" style="display:none">
+    <span id="reset-bar-text">🔄 次回自動リセット：—</span>
+    <button class="reset-now-btn" onclick="confirmReset()">今すぐリセット</button>
+  </div>
+
+  <nav class="nav">
+    <button class="nav-btn active" onclick="switchTab('dashboard',this)">ダッシュボード</button>
+    <button class="nav-btn" onclick="switchTab('girls',this)">女の子</button>
+    <button class="nav-btn" onclick="switchTab('reservations',this)">予約管理</button>
+    <button class="nav-btn" onclick="switchTab('drivers',this)">ドライバー</button>
+  </nav>
+
+  <main class="main" id="main-content">
+    <div class="loading"><div class="spinner"></div>データを読み込み中...</div>
+  </main>
+</div>
+
+<div id="overlay" class="overlay" style="display:none" onclick="closeOverlay(event)"></div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, update, remove, get }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+// ===== Firebase設定 =====
+const firebaseConfig = {
+  apiKey: "AIzaSyDabQXiLLyhUL6wYmjc5HB6cbU8-Rths80",
+  authDomain: "jade--pure.firebaseapp.com",
+  databaseURL: "https://jade--pure-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "jade--pure",
+  storageBucket: "jade--pure.firebasestorage.app",
+  messagingSenderId: "428723763775",
+  appId: "1:428723763775:web:0bb18787a9f1186292568a"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+
+// ===== 定数 =====
+const COURSES  = ['60分','90分','120分','150分','180分','延長30分','フリー'];
+const EMOJIS   = ['💎','🌸','🌙','🌺','⭐','🦋','🌹','🍀','🎀','🌈','🔮','💫','🌊','🦚','🌻'];
+const STATUSES = ['待機中','出発済','接客中','休憩中','退勤'];
+const STATUS_COLOR = {'待機中':'var(--jade-light)','出発済':'var(--amber)','接客中':'var(--red)','休憩中':'var(--purple)','退勤':'var(--text3)'};
+const STATUS_CLASS = {'待機中':'s-waiting','出発済':'s-depart','接客中':'s-serving','休憩中':'s-break','退勤':'s-off'};
+const CARD_CLASS   = {'待機中':'card-waiting','出発済':'card-depart','接客中':'card-serving','休憩中':'card-break','退勤':'card-off'};
+const RES_STATUS_COLOR = {'予約確定':'var(--purple)','出発済':'var(--amber)','接客中':'var(--red)','完了':'var(--jade-light)','キャンセル':'var(--text3)'};
+
+// ===== 状態 =====
+let state = {
+  girlsMaster:   [],
+  dailyState:    {},
+  driversMaster: [],
+  driversState:  {},
+  reservations:  [],
+  lastReset:     null,
+};
+let currentTab    = 'dashboard';
+let resFilter     = '全て';
+let settingsTab   = 'girls';
+let isOnline      = false;
+
+// ===== Firebase ヘルパー =====
+function fbSet(path, val) { return set(ref(db, path), val); }
+function fbUpdate(path, val) { return update(ref(db, path), val); }
+function fbRemove(path) { return remove(ref(db, path)); }
+
+// ===== リアルタイム購読 =====
+function subscribeAll() {
+  onValue(ref(db, 'girlsMaster'), snap => {
+    state.girlsMaster = snap.val() ? Object.values(snap.val()) : [];
+    renderMain(); updateHeader();
+  });
+  onValue(ref(db, 'dailyState'), snap => {
+    state.dailyState = snap.val() || {};
+    renderMain(); updateHeader();
+  });
+  onValue(ref(db, 'driversMaster'), snap => {
+    state.driversMaster = snap.val() ? Object.values(snap.val()) : [];
+    renderMain(); updateHeader();
+  });
+  onValue(ref(db, 'driversState'), snap => {
+    state.driversState = snap.val() || {};
+    renderMain(); updateHeader();
+  });
+  onValue(ref(db, 'reservations'), snap => {
+    const raw = snap.val() || {};
+    state.reservations = Object.values(raw).sort((a,b) => b.id - a.id);
+    renderMain(); updateHeader();
+  });
+  onValue(ref(db, 'lastReset'), snap => {
+    state.lastReset = snap.val();
+    updateResetBar();
+    checkAutoReset();
+  });
+  onValue(ref(db, '.info/connected'), snap => {
+    isOnline = snap.val() === true;
+    const dot  = document.getElementById('sync-dot');
+    const text = document.getElementById('sync-text');
+    if(isOnline) {
+      dot.className  = 'sync-dot';
+      text.textContent = 'リアルタイム同期中';
+    } else {
+      dot.className  = 'sync-dot offline';
+      text.textContent = 'オフライン';
+    }
+  });
+}
+
+// ===== computed =====
+function girlsList() {
+  return state.girlsMaster.map(g => ({
+    ...g,
+    status:    state.dailyState[g.id]?.status    || '待機中',
+    startTime: state.dailyState[g.id]?.startTime || '',
+    endTime:   state.dailyState[g.id]?.endTime   || '',
+    location:  state.dailyState[g.id]?.location  || '',
+  }));
+}
+function driversList() {
+  return state.driversMaster.map(d => ({
+    ...d,
+    status: state.driversState[d.id]?.status || '待機中',
+  }));
+}
+function activeRes() {
+  return state.reservations.filter(r => r.status !== '完了' && r.status !== 'キャンセル');
+}
+
+// ===== リセット =====
+function nextResetTs() {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  d.setHours(9, 0, 0, 0);
+  return d.getTime();
+}
+function checkAutoReset() {
+  if(state.lastReset && Date.now() >= state.lastReset) doReset();
+}
+function doReset() {
+  fbSet('dailyState', {});
+  fbSet('driversState', {});
+  fbSet('reservations', {});
+  fbSet('lastReset', nextResetTs());
+  showToast('🔄 リセットしました');
+}
+window.confirmReset = function() {
+  openConfirmSheet('リセットしますか？','本日のステータスと予約をすべてリセットします。','リセット','danger', doReset);
+};
+function updateResetBar() {
+  const bar = document.getElementById('reset-bar');
+  if(!state.lastReset) { bar.style.display='none'; return; }
+  bar.style.display = 'flex';
+  const d = new Date(state.lastReset);
+  document.getElementById('reset-bar-text').textContent =
+    `🔄 次回自動リセット：${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+// ===== ヘッダー =====
+function updateHeader() {
+  const gs = girlsList();
+  document.getElementById('badge-working').textContent = '稼働 ' + gs.filter(g=>g.status==='接客中'||g.status==='出発済').length;
+  document.getElementById('badge-waiting').textContent = '待機 ' + gs.filter(g=>g.status==='待機中').length;
+}
+
+// ===== タブ =====
+window.switchTab = function(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMain();
+};
+function renderMain() {
+  const el = document.getElementById('main-content');
+  if(currentTab==='dashboard')    el.innerHTML = renderDashboard();
+  else if(currentTab==='girls')   el.innerHTML = renderGirls();
+  else if(currentTab==='reservations') el.innerHTML = renderReservations();
+  else if(currentTab==='drivers') el.innerHTML = renderDrivers();
+  el.scrollTop = 0;
+}
+
+// ===== ダッシュボード =====
+function renderDashboard() {
+  const gs=girlsList(), ds=driversList(), ar=activeRes();
+  const stats=[
+    {label:'本日予約', value:state.reservations.length, unit:'件'},
+    {label:'接客中',   value:gs.filter(g=>g.status==='接客中').length, unit:'名'},
+    {label:'待機中',   value:gs.filter(g=>g.status==='待機中').length, unit:'名'},
+    {label:'配車可能', value:ds.filter(d=>d.status==='待機中').length, unit:'台'},
+  ];
+  let html = `<div class="stats-grid">`;
+  stats.forEach(s => { html+=`<div class="stat-card"><div class="stat-value">${s.value}<span class="stat-unit">${s.unit}</span></div><div class="stat-label">${s.label}</div></div>`; });
+  html += `</div>`;
+  html += `<div class="section"><div class="section-head"><span class="section-title">女の子ステータス</span></div>`;
+  if(gs.length===0) html+=`<div class="empty">⚙ 設定から女の子を登録してください</div>`;
+  else { html+=`<div class="girls-grid">`; gs.forEach(g=>{html+=girlCardHTML(g);}); html+=`</div>`; }
+  html += `</div>`;
+  html += `<div class="section"><div class="section-head"><span class="section-title">アクティブ予約</span><button class="add-btn" onclick="openResForm(0)">＋ 新規予約</button></div>`;
+  if(ar.length===0) html+=`<div class="empty">予約なし</div>`;
+  else ar.forEach(r=>{html+=resRowHTML(r,true);});
+  html += `</div>`;
+  return html;
+}
+
+// ===== 女の子一覧 =====
+function renderGirls() {
+  const gs = girlsList();
+  let html = `<div class="section"><div class="section-head"><span class="section-title">女の子一覧</span><span style="font-size:10px;color:var(--text3)">タップでステータス変更</span></div>`;
+  if(gs.length===0) html+=`<div class="empty">⚙ 右上の設定から登録してください</div>`;
+  else { html+=`<div class="girls-grid">`; gs.forEach(g=>{html+=girlCardHTML(g);}); html+=`</div>`; }
+  html+=`</div><div class="section"><div class="section-head"><span class="section-title">ステータス集計</span></div><div class="summary-grid">`;
+  STATUSES.forEach(st=>{
+    const col=STATUS_COLOR[st]||'var(--text3)';
+    const cnt=gs.filter(g=>g.status===st).length;
+    html+=`<div class="summary-card" style="border-left-color:${col}"><span style="font-size:22px;font-weight:700;color:${col}">${cnt}</span><span style="font-size:12px;color:var(--text2)">${st}</span></div>`;
+  });
+  html+=`</div></div>`;
+  return html;
+}
+
+function girlCardHTML(g) {
+  const sc = STATUS_CLASS[g.status]||'s-waiting';
+  const cc = CARD_CLASS[g.status]||'card-waiting';
+  let inner = `<div class="girl-photo">${g.photo}</div><div class="girl-name">${esc(g.name)}</div><span class="girl-status ${sc}">${g.status}</span>`;
+  if((g.status==='接客中'||g.status==='出発済') && g.endTime) inner+=`<div class="girl-time">〜${g.endTime}</div>`;
+  if(g.location) inner+=`<div class="girl-loc">📍${esc(g.location.length>9?g.location.slice(0,9)+'…':g.location)}</div>`;
+  return `<div class="girl-card ${cc}" onclick="openStatusSheet('${g.id}')">${inner}</div>`;
+}
+
+// ===== ステータスシート =====
+window.openStatusSheet = function(id) {
+  const g = girlsList().find(x=>x.id==id);
+  if(!g) return;
+  let btns='';
+  STATUSES.forEach(st=>{
+    const col=STATUS_COLOR[st]||'var(--text3)';
+    const sel=g.status===st;
+    btns+=`<button class="status-opt" onclick="setStatusOpt(this,'${st}')" data-status="${st}"
+      style="${sel?`border-color:${col};color:${col};background:${col}22;`:''}">
+      ${st}</button>`;
+    if(sel) btns = btns.replace('data-status', 'data-selected="true" data-status');
+  });
+  const html=`
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <span class="sheet-title">${g.photo} ${esc(g.name)}</span>
+      <button class="close-btn" onclick="closeSheet()">✕</button>
+    </div>
+    <div class="status-grid" id="status-grid">${btns}</div>
+    <div id="detail-fields" style="margin-bottom:14px;display:${(g.status==='接客中'||g.status==='出発済')?'flex':'none'};flex-direction:column;gap:10px;">
+      <div class="form-row"><label class="form-label">開始時刻</label><input class="form-input" type="time" id="f-start" value="${g.startTime||''}"></div>
+      <div class="form-row"><label class="form-label">終了時刻</label><input class="form-input" type="time" id="f-end" value="${g.endTime||''}"></div>
+      <div class="form-row"><label class="form-label">場所</label><input class="form-input" type="text" id="f-loc" value="${esc(g.location||'')}" placeholder="ホテル名など"></div>
+    </div>
+    <button class="primary-btn" onclick="saveStatus('${g.id}')">更新する</button>
+    <div id="del-section">
+      <button class="delete-link" onclick="showDelConfirm('${g.id}','${esc(g.name)}')">🗑 本日の出勤リストから削除</button>
+    </div>`;
+  openSheet(html);
+};
+
+window.setStatusOpt = function(btn, st) {
+  document.querySelectorAll('#status-grid .status-opt').forEach(b=>{
+    b.style.borderColor=''; b.style.color=''; b.style.background='';
+    delete b.dataset.selected;
+  });
+  const col = STATUS_COLOR[st]||'var(--text3)';
+  btn.style.borderColor=col; btn.style.color=col; btn.style.background=col+'22';
+  btn.dataset.selected='true';
+  const needDetail = st==='接客中'||st==='出発済';
+  document.getElementById('detail-fields').style.display = needDetail?'flex':'none';
+};
+
+window.saveStatus = function(id) {
+  const btn = document.querySelector('#status-grid .status-opt[data-selected]');
+  if(!btn){ showToast('ステータスを選択してください','err'); return; }
+  const st = btn.dataset.status;
+  const needDetail = st==='接客中'||st==='出発済';
+  fbUpdate('dailyState/'+id, {
+    status:    st,
+    startTime: needDetail?(document.getElementById('f-start')?.value||''):'',
+    endTime:   needDetail?(document.getElementById('f-end')?.value||''):'',
+    location:  needDetail?(document.getElementById('f-loc')?.value||''):'',
+  });
+  closeSheet();
+  showToast('ステータスを更新しました');
+};
+
+window.showDelConfirm = function(id, name) {
+  document.getElementById('del-section').innerHTML=`
+    <div class="del-confirm-box">
+      <div class="del-confirm-text">${esc(name)} を削除しますか？</div>
+      <div class="del-confirm-btns">
+        <button class="del-cancel" onclick="showDelConfirm('${id}','${esc(name)}')">キャンセル</button>
+        <button class="del-exec" onclick="deleteGirl('${id}')">削除する</button>
+      </div>
+    </div>`;
+};
+
+window.deleteGirl = function(id) {
+  fbRemove('girlsMaster/'+id);
+  fbRemove('dailyState/'+id);
+  closeSheet();
+  showToast('削除しました');
+};
+
+// ===== 予約 =====
+function renderReservations() {
+  const filters=['全て','予約確定','出発済','接客中','完了','キャンセル'];
+  let filterHtml = filters.map(f=>`<button class="filter-btn${f===resFilter?' active':''}" onclick="setResFilter('${f}')">${f}</button>`).join('');
+  let html=`<div class="section"><div class="section-head"><span class="section-title">予約一覧</span><button class="add-btn" onclick="openResForm(0)">＋ 新規</button></div><div class="filter-row">${filterHtml}</div>`;
+  const list = resFilter==='全て' ? state.reservations : state.reservations.filter(r=>r.status===resFilter);
+  if(list.length===0) html+=`<div class="empty">該当する予約はありません</div>`;
+  else list.forEach(r=>{html+=resRowHTML(r,false);});
+  html+=`</div>`;
+  return html;
+}
+window.setResFilter = function(f){ resFilter=f; renderMain(); };
+
+function resRowHTML(r, compact) {
+  const col = RES_STATUS_COLOR[r.status]||'var(--text3)';
+  let html=`<div class="res-row">
+    <div class="res-top">
+      <div class="res-info">
+        <span class="res-status" style="color:${col}">${r.status}</span>
+        <span class="res-girl">${esc(r.girlName)}</span>
+        <span class="res-cust">${esc(r.customerName)}</span>
+      </div>
+      <span class="res-time">${r.startTime}〜${r.endTime}</span>
+    </div>
+    <div class="res-details">
+      <span class="res-detail">📍${esc(r.location)}</span>
+      <span class="res-detail">🚗${esc(r.driverName||'未配車')}</span>
+      <span class="res-detail">⏱${esc(r.course)}</span>
+    </div>`;
+  if(r.note) html+=`<div class="res-note">📝 ${esc(r.note)}</div>`;
+  if(!compact){
+    html+=`<div class="res-actions">`;
+    ['予約確定','出発済','接客中','完了'].forEach(st=>{
+      const c=RES_STATUS_COLOR[st]||'#fff';
+      html+=`<button class="res-act-btn" style="color:${c};opacity:${r.status===st?0.4:1}" onclick="changeResStatus(${r.id},'${st}')">${st}</button>`;
+    });
+    html+=`<button class="res-act-btn" onclick="openResForm(${r.id})">編集</button>`;
+    html+=`</div>`;
+  }
+  html+=`</div>`;
+  return html;
+}
+
+window.changeResStatus = function(id, st) {
+  fbUpdate('reservations/'+id, {status: st});
+  showToast('更新しました');
+};
+
+// ===== 予約フォーム =====
+window.openResForm = function(editId) {
+  const gs = girlsList().filter(g=>g.status==='待機中'||g.status==='休憩中');
+  const ds = driversList();
+  const edit = editId ? state.reservations.find(r=>r.id==editId) : null;
+  const girlOpts = gs.map(g=>`<option value="${g.id}"${edit&&edit.girlId==g.id?' selected':''}>${g.photo} ${esc(g.name)}</option>`).join('');
+  const drvOpts  = ds.map(d=>`<option value="${d.id}"${edit&&edit.driverId==d.id?' selected':''}>${esc(d.name)}</option>`).join('');
+  const cOpts    = COURSES.map(c=>`<option${edit&&edit.course===c?' selected':''}>${c}</option>`).join('');
+  const stOpts   = ['予約確定','出発済','接客中'].map(s=>`<option${edit&&edit.status===s?' selected':''}>${s}</option>`).join('');
+  const html=`
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <span class="sheet-title">${edit?'予約編集':'新規予約登録'}</span>
+      <button class="close-btn" onclick="closeSheet()">✕</button>
+    </div>
+    <div class="form-section">
+      <div class="form-row"><label class="form-label">女の子 *</label>
+        <select class="form-select" id="rf-girl"><option value="">選択してください</option>${girlOpts}</select></div>
+      <div class="form-row"><label class="form-label">顧客名 *</label><input class="form-input" id="rf-cust" value="${edit?esc(edit.customerName):''}" placeholder="田中様"></div>
+      <div class="form-row"><label class="form-label">電話番号</label><input class="form-input" id="rf-phone" type="tel" value="${edit?esc(edit.phone||''):''}" placeholder="090-XXXX-XXXX"></div>
+      <div class="form-row"><label class="form-label">コース</label><select class="form-select" id="rf-course">${cOpts}</select></div>
+      <div class="form-row"><label class="form-label">開始時刻 *</label><input class="form-input" id="rf-start" type="time" value="${edit?edit.startTime:''}"></div>
+      <div class="form-row"><label class="form-label">終了時刻</label><input class="form-input" id="rf-end" type="time" value="${edit?edit.endTime:''}"></div>
+      <div class="form-row"><label class="form-label">場所 *</label><input class="form-input" id="rf-loc" value="${edit?esc(edit.location):''}" placeholder="ホテル名・住所"></div>
+      <div class="form-row"><label class="form-label">ドライバー</label>
+        <select class="form-select" id="rf-drv"><option value="">未配車</option>${drvOpts}</select></div>
+      <div class="form-row"><label class="form-label">ステータス</label><select class="form-select" id="rf-st">${stOpts}</select></div>
+      <div class="form-row"><label class="form-label">備考</label><input class="form-input" id="rf-note" value="${edit?esc(edit.note||''):''}" placeholder="延長希望など"></div>
+    </div>
+    <button class="primary-btn" onclick="submitRes(${editId||0})">${edit?'保存する':'予約登録'}</button>`;
+  openSheet(html);
+};
+
+window.submitRes = function(editId) {
+  const girlId = document.getElementById('rf-girl').value;
+  const cust   = document.getElementById('rf-cust').value.trim();
+  const start  = document.getElementById('rf-start').value;
+  const loc    = document.getElementById('rf-loc').value.trim();
+  if(!girlId||!cust||!start||!loc){ showToast('必須項目を入力してください','err'); return; }
+  const drvId  = document.getElementById('rf-drv').value;
+  const drv    = driversList().find(d=>d.id==drvId);
+  const girl   = girlsList().find(g=>g.id==girlId);
+  const data = {
+    girlId, girlName:girl?.name||'', customerName:cust,
+    phone:   document.getElementById('rf-phone').value,
+    course:  document.getElementById('rf-course').value,
+    startTime:start, endTime:document.getElementById('rf-end').value,
+    location:loc, driverId:drvId||'', driverName:drv?.name||'',
+    status:  document.getElementById('rf-st').value,
+    note:    document.getElementById('rf-note').value,
+  };
+  if(editId) {
+    fbUpdate('reservations/'+editId, data);
+    showToast('予約を更新しました');
+  } else {
+    const id = Date.now();
+    data.id = id;
+    data.createdAt = new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+    fbSet('reservations/'+id, data);
+    if(data.status==='出発済'||data.status==='接客中'){
+      fbUpdate('dailyState/'+girlId, {status:data.status, startTime:data.startTime, endTime:data.endTime, location:data.location});
+    }
+    showToast('予約を登録しました');
+  }
+  closeSheet();
+};
+
+// ===== ドライバー =====
+function renderDrivers() {
+  const ds = driversList();
+  let html=`<div class="section"><div class="section-head"><span class="section-title">ドライバー管理</span><span style="font-size:10px;color:var(--text3)">タップで切り替え</span></div>`;
+  if(ds.length===0) html+=`<div class="empty">⚙ 設定からドライバーを登録してください</div>`;
+  else ds.forEach(d=>{
+    const isWait=d.status==='待機中';
+    html+=`<div class="driver-row">
+      <div>
+        <div class="driver-name">🚗 ${esc(d.name)}</div>
+        ${d.phone?`<div class="driver-phone">${esc(d.phone)}</div>`:''}
+      </div>
+      <div class="driver-right">
+        <button class="status-toggle" onclick="toggleDriver('${d.id}')"
+          style="background:${isWait?'var(--jade-pale)':'var(--amber-pale)'};color:${isWait?'var(--jade-light)':'var(--amber)'};border-color:${isWait?'var(--jade-border)':'rgba(212,150,58,.35)'}">
+          ${d.status}
+        </button>
+        <button class="del-btn" onclick="deleteDriver('${d.id}')">🗑</button>
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+  return html;
+}
+window.toggleDriver = function(id) {
+  const cur = state.driversState[id]?.status || '待機中';
+  fbUpdate('driversState/'+id, {status: cur==='待機中'?'配車中':'待機中'});
+};
+window.deleteDriver = function(id) {
+  fbRemove('driversMaster/'+id);
+  fbRemove('driversState/'+id);
+  showToast('削除しました');
+};
+
+// ===== 設定 =====
+window.openSettings = function() { renderSettingsSheet(); };
+
+function renderSettingsSheet() {
+  const gList = state.girlsMaster;
+  const dList = state.driversMaster;
+  let girlRows='';
+  gList.forEach(g=>{
+    const emojiOpts=EMOJIS.map(e=>`<option${g.photo===e?' selected':''}>${e}</option>`).join('');
+    girlRows+=`<div class="master-row">
+      <select class="emoji-sel" onchange="updateGirlField('${g.id}','photo',this.value)">${emojiOpts}</select>
+      <input class="form-input" value="${esc(g.name)}" oninput="updateGirlField('${g.id}','name',this.value)" style="flex:1">
+      <button class="del-icon-btn" onclick="removeGirlMaster('${g.id}')">🗑</button>
+    </div>`;
+  });
+  let driverRows='';
+  dList.forEach(d=>{
+    driverRows+=`<div class="master-row" style="align-items:flex-start">
+      <span style="font-size:20px;padding-top:8px">🚗</span>
+      <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+        <input class="form-input" value="${esc(d.name)}" oninput="updateDriverField('${d.id}','name',this.value)">
+        <input class="form-input" style="font-size:12px" value="${esc(d.phone||'')}" placeholder="電話番号" oninput="updateDriverField('${d.id}','phone',this.value)">
+      </div>
+      <button class="del-icon-btn" onclick="removeDriverMaster('${d.id}')" style="margin-top:2px">🗑</button>
+    </div>`;
+  });
+  const girlsContent=`
+    <div class="add-row">
+      <select class="emoji-sel" id="new-girl-emoji">${EMOJIS.map(e=>`<option>${e}</option>`).join('')}</select>
+      <input class="form-input" id="new-girl-name" placeholder="名前" style="flex:1" onkeydown="if(event.key==='Enter')addGirlMaster()">
+      <button class="add-btn" onclick="addGirlMaster()">追加</button>
+    </div>
+    <div id="girl-list">${girlRows||'<div class="empty">まだ登録されていません</div>'}</div>`;
+  const driversContent=`
+    <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:12px">
+      <input class="form-input" id="new-drv-name" placeholder="名前" onkeydown="if(event.key==='Enter')addDriverMaster()">
+      <input class="form-input" id="new-drv-phone" placeholder="電話番号（任意）">
+      <button class="add-btn" onclick="addDriverMaster()" style="align-self:stretch;text-align:center">＋ 追加</button>
+    </div>
+    <div id="driver-list">${driverRows||'<div class="empty">まだ登録されていません</div>'}</div>`;
+  const html=`
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <span class="sheet-title">⚙ 本日の出勤設定</span>
+      <button class="close-btn" onclick="closeSheet()">✕</button>
+    </div>
+    <p style="color:var(--text3);font-size:12px;margin-bottom:14px;line-height:1.7">本日出勤するメンバーを登録。翌9:00に自動リセットされます。</p>
+    <div class="settings-tabs">
+      <button class="settings-tab${settingsTab==='girls'?' active':''}" onclick="switchSettingsTab('girls')">👧 女の子</button>
+      <button class="settings-tab${settingsTab==='drivers'?' active':''}" onclick="switchSettingsTab('drivers')">🚗 ドライバー</button>
+    </div>
+    <div id="settings-content">${settingsTab==='girls'?girlsContent:driversContent}</div>
+    <button class="primary-btn" style="margin-top:20px" onclick="saveSettings()">保存する</button>`;
+  openSheet(html);
+}
+
+// 設定内の一時バッファ
+let girlsBuf   = {};
+let driversBuf = {};
+
+window.updateGirlField   = (id,field,val) => { if(!girlsBuf[id])   girlsBuf[id]={};   girlsBuf[id][field]=val; };
+window.updateDriverField = (id,field,val) => { if(!driversBuf[id]) driversBuf[id]={}; driversBuf[id][field]=val; };
+
+window.addGirlMaster = function() {
+  const name  = document.getElementById('new-girl-name')?.value.trim();
+  const emoji = document.getElementById('new-girl-emoji')?.value || '💎';
+  if(!name) return;
+  const id = Date.now();
+  fbSet('girlsMaster/'+id, {id, name, photo:emoji});
+  renderSettingsSheet();
+};
+window.removeGirlMaster = function(id) {
+  fbRemove('girlsMaster/'+id);
+  fbRemove('dailyState/'+id);
+  renderSettingsSheet();
+};
+window.addDriverMaster = function() {
+  const name  = document.getElementById('new-drv-name')?.value.trim();
+  const phone = document.getElementById('new-drv-phone')?.value.trim() || '';
+  if(!name) return;
+  const id = Date.now();
+  fbSet('driversMaster/'+id, {id, name, phone});
+  renderSettingsSheet();
+};
+window.removeDriverMaster = function(id) {
+  fbRemove('driversMaster/'+id);
+  fbRemove('driversState/'+id);
+  renderSettingsSheet();
+};
+window.switchSettingsTab = function(tab) { settingsTab=tab; renderSettingsSheet(); };
+
+window.saveSettings = function() {
+  // バッファに溜まった変更をFirebaseへ
+  Object.entries(girlsBuf).forEach(([id,fields])=>{ fbUpdate('girlsMaster/'+id, fields); });
+  Object.entries(driversBuf).forEach(([id,fields])=>{ fbUpdate('driversMaster/'+id, fields); });
+  girlsBuf={}; driversBuf={};
+  // リセットスケジュール
+  fbSet('lastReset', nextResetTs());
+  closeSheet();
+  showToast('設定を保存しました');
+};
+
+// ===== 確認シート =====
+function openConfirmSheet(title, desc, btnLabel, type, cb) {
+  const html=`
+    <div class="sheet-handle"></div>
+    <div class="confirm-body">
+      <div class="confirm-icon">🔄</div>
+      <div class="confirm-title">${esc(title)}</div>
+      <div class="confirm-desc">${esc(desc)}</div>
+      <div class="confirm-btns">
+        <button class="cancel-btn" onclick="closeSheet()">キャンセル</button>
+        <button class="${type==='danger'?'danger-btn':'primary-btn'}" onclick="_confirmCb()">${esc(btnLabel)}</button>
+      </div>
+    </div>`;
+  openSheet(html);
+  window._confirmCb = ()=>{ cb(); closeSheet(); };
+}
+
+// ===== シート/オーバーレイ =====
+function openSheet(html) {
+  const ov = document.getElementById('overlay');
+  ov.innerHTML = `<div class="sheet" onclick="event.stopPropagation()">${html}</div>`;
+  ov.style.display = 'flex';
+}
+window.closeSheet = function() { document.getElementById('overlay').style.display='none'; };
+window.closeOverlay = function(e) { if(e.target===document.getElementById('overlay')) closeSheet(); };
+
+// ===== トースト =====
+let toastTimer=null;
+function showToast(msg, type) {
+  let t=document.querySelector('.toast');
+  if(!t){ t=document.createElement('div'); t.className='toast'; document.body.appendChild(t); }
+  t.textContent=msg;
+  t.style.background=type==='err'?'var(--red)':'var(--jade)';
+  t.style.display='block';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{t.style.display='none';},3000);
+}
+
+// ===== エスケープ =====
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ===== 起動 =====
+subscribeAll();
+setInterval(checkAutoReset, 60000);
+
+</script>
+</body>
+</html>
